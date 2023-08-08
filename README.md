@@ -1,3 +1,6 @@
+
+![image](https://github.com/vlasvlasvlas/leaflet-mapa-geojson/assets/4071796/5e34dc0e-1c98-4242-a770-9c9fd291ccbc)
+
 ## Qué es esto
 
 Es una MVP Demo para lectura y escritura de geojsons en MS SQL Server usando la librería Leaflet con la extensión Geoman.
