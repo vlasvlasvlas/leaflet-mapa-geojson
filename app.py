@@ -65,7 +65,7 @@ def guardar_geojson():
         return jsonify({"error": str(e)})
 
 
-# guardar el geojson
+# cargar el geojson
 @app.route('/cargar_geojson', methods=['POST'])
 def cargar_geojson():
     try:
