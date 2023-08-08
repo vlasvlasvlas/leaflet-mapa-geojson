@@ -55,5 +55,6 @@ python app.py
 
 ## To-Do's
 
-- update geom based on ID
-- remove hardcoded ID from test
+:black_square_button: update geom based on ID
+
+:black_square_button: remove hardcoded ID from test
