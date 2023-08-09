@@ -230,6 +230,9 @@
                 var layer = L.geoJSON(feature).addTo(map);
                 geometryLayerGroup.addLayer(layer);
 
+                // fly to bounds
+                map.flyToBounds(L.geoJson(map.pm.getGeomanLayers(true).toGeoJSON()).getBounds());
+
                 // solo para validar en console.log:
                 obtenerFeatureCollection();
             });
