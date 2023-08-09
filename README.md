@@ -1,27 +1,33 @@
 
 ![image](https://github.com/vlasvlasvlas/leaflet-mapa-geojson/assets/4071796/5e34dc0e-1c98-4242-a770-9c9fd291ccbc)
 
-## Qué es esto
+# Qué es esto
 
-Es una MVP Demo para lectura y escritura de geojsons en MS SQL Server usando la librería Leaflet con la extensión Geoman.
+Esto es un MVP Demo para lectura, edición y escritura de geometrías geojsons en MS SQL Server, usando la librería Leaflet con la extensión Geoman.
 
 Utiliza Python 3 y Flask como framework.
 
-## Para qué
+# Para qué
 
-Para poder levantar rapidamente un webgis simple de carga y edición de geometrías que hable con MS SQL Server.
+Para poder levantar rapidamente un webgis embebido que sea sencillo para  la carga y edición de geometrías que almacene los datos en MS SQL Server.
 
+# Instalación
 
-## virtualenv
+## 1. virtualenv
+
+Es necesario crear un virtual enviroment con venv.
 
 ```
 python -m venv venv
 source venv/scripts/activate
 ```
-:white_check_mark: check (venv) on cli 
+
+:white_check_mark: revisar que aparezca (venv) en la CLI.
 
 
-## pip install requirements.txt
+## 2. Dependencias y librerías
+
+Es necesario instalar las dependencias 
 
 ```
 pip install -r requirements.txt
@@ -32,7 +38,9 @@ pip install -r requirements.txt
 
 - fill .env.dummy with DB conn and copy it to .env
 
-## SQL DDL
+## 3. SQL DDL
+
+Es necesario tener una tabla para alojar las geometrías.
 
 ```
 --create table
@@ -48,16 +56,22 @@ VALUES('{"type":"FeatureCollection","features":[{"type":"Feature","properties":{
 ```
 
 
-## ejecución
+## 4. Ejecución
+
+Es necesario ejecutar la aplicación de Python utlizando la CLI.
 
 ```
+
 python app.py
+
 ```
 
-- enjoy!
+- Ingresar a través de un browser utilizando //localhost:5000
 
 ## To-Do's
 
-:black_square_button: update geom based on ID
+:black_square_button: Sumar un ID de objeto al cual se le asocia la geometrías (id_objeto, id_geom, geojson).
 
-:black_square_button: remove hardcoded ID from test
+:black_square_button: Sumar método "update" para las geometrías basadas en un id específico.
+
+:black_square_button: dejar de forma dinámica el ID de la geometría.
