@@ -34,7 +34,7 @@ pip install -r requirements.txt
 
 ```
 
-:white_check_mark: check installed dependencies (Flask, PyODBC, Dotenv)
+:white_check_mark: check installed dependencies (Flask, PyODBC, Dotenv, Black)
 
 - fill .env.dummy with DB conn and copy it to .env
 
