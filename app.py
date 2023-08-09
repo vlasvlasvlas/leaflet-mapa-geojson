@@ -1,4 +1,5 @@
-import os, pyodbc
+import os
+import pyodbc
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 
@@ -62,8 +63,8 @@ def guardar_geojson():
         connection.close()
 
         return jsonify({"message": "GeoJSON guardado correctamente"})
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    except Exception as err:
+        return jsonify({"error": str(err)})
 
 
 # cargar el geojson
@@ -97,8 +98,8 @@ def cargar_geojson():
             }
         )
 
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    except Exception as err:
+        return jsonify({"error": str(err)})
 
 
 if __name__ == "__main__":
