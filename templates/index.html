@@ -33,6 +33,9 @@
 
         // mapa
         var map = L.map('map').setView(centro, zoom);
+
+        // español
+        map.pm.setLang('es'); 
     
         /* old basemap
 
@@ -92,25 +95,27 @@
         obtenerFeatureCollection();
 
             // listen to changes on the new layer
+            // escucha los cambios al CREAR + EDITAR
             e.layer.on('pm:edit', function(x) {
-                console.log('edit', x);
+                console.log('create and edit', x);
                 obtenerFeatureCollection();
             });
 
         });
 
 
+        // escuchar eventos al eliminar
         map.on('pm:remove', function(event) {
-
             console.log('remove', event);
             console.log(event.layer);
             obtenerFeatureCollection();
-
         });
 
 
         // Ejemplo de cómo obtener el FeatureCollection al final
         function obtenerFeatureCollection() {
+
+            // <- trae desde getGeomanLayers(), convierte a geojson, stringifea y obtiene las geoms para guardar
             featureCollection = map.pm.getGeomanLayers(true).toGeoJSON();
             var featureCollectionStringify= JSON.stringify(featureCollection);
             console.log('FeatureCollection:', featureCollectionStringify);
@@ -126,7 +131,7 @@
         // modificar en caso de ser necesario, toma el dato del featureCollectionStringify y lo envia como post a guardar geojson
         function guardarFeatureCollectionEnBD() {
 
-            //
+            // <- trae desde getGeomanLayers(), convierte a geojson, stringifea y obtiene las geoms para guardar
             featureCollection = map.pm.getGeomanLayers(true).toGeoJSON();
             var featureCollectionStringify= JSON.stringify(featureCollection);
 
@@ -229,6 +234,14 @@
                 // crea una capa tipo geojson, y la agrega al mapa
                 var layer = L.geoJSON(feature).addTo(map);
                 geometryLayerGroup.addLayer(layer);
+
+                // fix: 20230815: escuchar eventos al editar la capa sin pm:create
+                layer.on('pm:edit', function(event) {
+                    console.log('edit', event);
+                    console.log(event.layer);
+                    obtenerFeatureCollection();
+                });
+                
 
                 // fly to bounds
                 map.flyToBounds(L.geoJson(map.pm.getGeomanLayers(true).toGeoJSON()).getBounds());
