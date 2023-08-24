@@ -21,10 +21,25 @@
 
     <div id="map"></div>
 
+    <!-- jquery: https://github.com/jquery/jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+    <!-- leaflet: https://github.com/Leaflet/Leaflet -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- geoman: https://github.com/geoman-io/leaflet-geoman -->
     <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 
+    <!-- geocoder: https://github.com/perliedman/leaflet-control-geocoder -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <!-- basemap: https://github.com/clavijojuan/L.switchBasemap -->
+    <link rel="stylesheet" href="../static/css/L.switchBasemap.css" />
+    <script src="../static/js/L.switchBasemap.js"></script>
+
+
+    
     <script>
 
         // vars 
@@ -47,11 +62,37 @@
 
         // new basemap argenmap:
         // https://jsbin.com/gaxiwir/edit?html,output
+        /*
         L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
             attribution: '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a> + <a href="https://www.osm.org/copyright" target="_blank">OpenStreetMap</a>',
             minZoom: 1, 
             maxZoom: 20
         }).addTo(map);
+        */
+
+        // new basemap switch:
+        new L.basemapsSwitcher([
+        {
+            layer: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map), //DEFAULT MAP
+            icon: '../static/img/osm_logo.png',
+            name: 'OSM'
+        },
+        {
+            layer: L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
+            attribution: '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a> + <a href="https://www.osm.org/copyright" target="_blank">OpenStreetMap</a>',
+            minZoom: 1, 
+            maxZoom: 20
+        }),
+            icon: '../static/img/argenmap_logo.jpg',
+            name: 'Argenmap'
+        }
+        ], { position: 'topright' }).addTo(map);        
+
+        // geocoder:
+        L.Control.geocoder().addTo(map);
+
 
         var geometryLayerGroup = L.layerGroup();  // LayerGroup para almacenar las geometrías
 
