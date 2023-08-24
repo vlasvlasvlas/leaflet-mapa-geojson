@@ -93,7 +93,8 @@
         // geocoder:
         var geocoder = L.Control.geocoder({
             defaultMarkGeocode: false,
-            collapsed: false
+            collapsed: true, // para que aparezca abierto o cerrado
+            placeholder: 'Buscar..'
         })
         .on('markgeocode', (e) => {
             var bbox = e.geocode.bbox;
