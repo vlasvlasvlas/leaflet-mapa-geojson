@@ -301,6 +301,9 @@
                 // fly to bounds
                 map.flyToBounds(L.geoJson(map.pm.getGeomanLayers(true).toGeoJSON()).getBounds());
 
+                // console log polygon.getbounds.getcenter <- centro de geometrias:
+                console.log("--> polygon.getbounds.getcenter: "+L.geoJson(map.pm.getGeomanLayers(true).toGeoJSON()).getBounds().getCenter());
+
                 // solo para validar en console.log:
                 obtenerFeatureCollection();
             });
