@@ -76,15 +76,31 @@ def cargar_geojson():
         connection = get_connection()
         cursor = connection.cursor()
 
-        sql_query = "SELECT geojson FROM dbo.test_geojson WHERE id = (?)"
+        sql_query = """
+        
+        SELECT '{"type": "FeatureCollection", "features": [' +
+        STRING_AGG(JSON_QUERY(geojson, '$.features'), ',') +
+        ']}'
+        FROM dbo.test_geojson;
+        
+        """
+        #"SELECT geojson,id FROM dbo.test_geojson WHERE id < (?)"
+        # completar el where con los filtros que se necesiten desde el front
+        
         cursor.execute(sql_query, feature_collectionid)
+        print("sql_query:",sql_query)
+        print("feature_collectionid:",feature_collectionid)
 
         # debug start
         columns = [column[0] for column in cursor.description]
         results = []
         for row in cursor.fetchall():
+            print("row in cursor ------- start")
+            print(dict(zip(columns, row)))
             results.append(dict(zip(columns, row)))
-        print(results[0]["geojson"])
+            print("row in cursor ------- end")
+        #print(results[0]["geojson"])
+        #print(results)
         # debug end
 
         connection.commit()

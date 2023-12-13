@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mapa con Leaflet-Geoman</title>
+    <title>Mapa con Leaflet-Geoman y MarkerCluster</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css" />
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -13,10 +15,9 @@
         <h3>Geojson:</h3>
         <div id="geojsondiv"></div>
         <button id="cargardb">Cargar DB</button>
-        <button id="guardardb">Guardar DB</button>
         <div id="geojsondivres"></div>
-    </div>    
-    
+    </div>
+
     <hr>
 
     <div id="map"></div>
@@ -30,6 +31,9 @@
     <!-- geoman: https://github.com/geoman-io/leaflet-geoman -->
     <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 
+    <!-- leaflet.markercluster: https://github.com/Leaflet/Leaflet.markercluster -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.js"></script>
+
     <!-- geocoder: https://github.com/perliedman/leaflet-control-geocoder -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
@@ -38,10 +42,7 @@
     <link rel="stylesheet" href="../static/css/L.switchBasemap.css" />
     <script src="../static/js/L.switchBasemap.js"></script>
 
-
-    
     <script>
-
         // vars 
         var centro = [-34.61, -58.38];
         var zoom = 13;
@@ -50,45 +51,27 @@
         var map = L.map('map').setView(centro, zoom);
 
         // español
-        map.pm.setLang('es'); 
-    
-        /* old basemap
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        */
-
-        // new basemap argenmap:
-        // https://jsbin.com/gaxiwir/edit?html,output
-        /*
-        L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
-            attribution: '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a> + <a href="https://www.osm.org/copyright" target="_blank">OpenStreetMap</a>',
-            minZoom: 1, 
-            maxZoom: 20
-        }).addTo(map);
-        */
+        map.pm.setLang('es');
 
         // new basemap switch:
         new L.basemapsSwitcher([
-        {
-            layer: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map), //DEFAULT MAP
-            icon: '../static/img/osm_logo.png',
-            name: 'OSM'
-        },
-        {
-            layer: L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
-            attribution: '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a> + <a href="https://www.osm.org/copyright" target="_blank">OpenStreetMap</a>',
-            minZoom: 1, 
-            maxZoom: 20
-        }),
-            icon: '../static/img/argenmap_logo.jpg',
-            name: 'Argenmap'
-        }
-        ], { position: 'topright' }).addTo(map);        
+            {
+                layer: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map), //DEFAULT MAP
+                icon: '../static/img/osm_logo.png',
+                name: 'OSM'
+            },
+            {
+                layer: L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
+                    attribution: '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a> + <a href="https://www.osm.org/copyright" target="_blank">OpenStreetMap</a>',
+                    minZoom: 1,
+                    maxZoom: 20
+                }),
+                icon: '../static/img/argenmap_logo.jpg',
+                name: 'Argenmap'
+            }
+        ], { position: 'topright' }).addTo(map);
 
         // geocoder:
         var geocoder = L.Control.geocoder({
@@ -96,34 +79,19 @@
             collapsed: true, // para que aparezca abierto o cerrado
             placeholder: 'Buscar..'
         })
-        .on('markgeocode', (e) => {
-            var bbox = e.geocode.bbox;
-            var poly = L.polygon([
-            bbox.getSouthEast(),
-            bbox.getNorthEast(),
-            bbox.getNorthWest(),
-            bbox.getSouthWest()
-            ]);
-            map.fitBounds(poly.getBounds());
-        })
-        .addTo(map);
+            .on('markgeocode', (e) => {
+                var bbox = e.geocode.bbox;
+                var poly = L.polygon([
+                    bbox.getSouthEast(),
+                    bbox.getNorthEast(),
+                    bbox.getNorthWest(),
+                    bbox.getSouthWest()
+                ]);
+                map.fitBounds(poly.getBounds());
+            })
+            .addTo(map);
 
         var geometryLayerGroup = L.layerGroup();  // LayerGroup para almacenar las geometrías
-
-        // created geometries (donde iria la geometria del mapa)
-
-        /*
-        var initialFeatureCollectionString = '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.381691,-34.550478]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.326588,-34.545388]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.328304,-34.567866]}}]}';
-        var initialFeatureCollection = JSON.parse(initialFeatureCollectionString);
-
-        // Agregar geometrías iniciales al LayerGroup
-        initialFeatureCollection.features.forEach(function(feature) {
-            var layer = L.geoJSON(feature).addTo(map);
-            geometryLayerGroup.addLayer(layer);
-            obtenerFeatureCollection();
-        });
-        */
-
 
         // Agregar el plugin Leaflet-Geoman para edición
         // config geoman
@@ -132,198 +100,123 @@
             drawCircleMarker: false,
             drawCircle: false,
             drawRectangle: false,
-            drawPolyline: true,
-            drawMarker: true,
-            drawPolygon: true,
-            editMode: true,
+            drawPolyline: false,
+            drawMarker: false,
+            drawPolygon: false,
+            editMode: false,
             dragMode: false,
             cutPolygon: false,
-            removalMode: true,
+            removalMode: false,
             rotateMode: false
         });
 
-
         // listen to when a new layer is created
-        map.on('pm:create', function(e) {
-
-        console.log('create', e);
-        obtenerFeatureCollection();
+        map.on('pm:create', function (e) {
+            console.log('create', e);
+            obtenerFeatureCollection();
 
             // listen to changes on the new layer
             // escucha los cambios al CREAR + EDITAR
-            e.layer.on('pm:edit', function(x) {
+            e.layer.on('pm:edit', function (x) {
                 console.log('create and edit', x);
                 obtenerFeatureCollection();
             });
-
         });
 
-
         // escuchar eventos al eliminar
-        map.on('pm:remove', function(event) {
+        map.on('pm:remove', function (event) {
             console.log('remove', event);
             console.log(event.layer);
             obtenerFeatureCollection();
         });
 
+        // Mostrar datos al hacer clic en un marcador
+        map.on('popupopen', function (e) {
+            // Puedes acceder a la información de la capa desde e.popup._source.feature.properties
+            var properties = e.popup._source.feature.properties;
+            console.log('Información del marcador:', properties);
+        });
 
         // Ejemplo de cómo obtener el FeatureCollection al final
         function obtenerFeatureCollection() {
-
             // <- trae desde getGeomanLayers(), convierte a geojson, stringifea y obtiene las geoms para guardar
             featureCollection = map.pm.getGeomanLayers(true).toGeoJSON();
-            var featureCollectionStringify= JSON.stringify(featureCollection);
+            var featureCollectionStringify = JSON.stringify(featureCollection);
             console.log('FeatureCollection:', featureCollectionStringify);
 
-            //muestra en el div el resultado
-
-            $('#geojsondiv').text('FeatureCollection: '+featureCollectionStringify);
-            
+            // muestra en el div el resultado
+            $('#geojsondiv').text('FeatureCollection: ' + featureCollectionStringify);
         }
 
 
-
-        // modificar en caso de ser necesario, toma el dato del featureCollectionStringify y lo envia como post a guardar geojson
-        function guardarFeatureCollectionEnBD() {
-
-            // <- trae desde getGeomanLayers(), convierte a geojson, stringifea y obtiene las geoms para guardar
-            featureCollection = map.pm.getGeomanLayers(true).toGeoJSON();
-            var featureCollectionStringify= JSON.stringify(featureCollection);
-
-            fetch('/guardar_geojson', {
-                method: 'POST',
+        // modificar en caso de ser necesario, toma el dato del featureCollectionStringify y lo envía como post a guardar geojson
+        function cargarFeatureCollectionEnBD() {
+            fetch('/cargar_geojson', {
+                method: 'POST', //body data
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    featureCollection: featureCollectionStringify
+                    idgeom: 10 // <-- variable del id que venga de la basea
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message);
-                $('#geojsondivres').text(data.message);
-            })
-            .catch(error => {
-                console.error('Error al guardar el GeoJSON:', error);
-            });
-        }
+                .then(response => response.json())
+                .then(data => {
+                    console.log('-------->');
+                    console.log(data.message);
+                    console.log(data.geojson);
 
-        // guarda al dar click en el boton
-        document.getElementById('guardardb').addEventListener('click', function() {
-            guardarFeatureCollectionEnBD();
-        });
+                    // load
+                    // <-- convertir el geojson desde la base, y desplegarlo en el mapa
+                    var initialFeatureCollectionString = data.geojson;
+                    //'{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.381691,-34.550478]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.326588,-34.545388]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.328304,-34.567866]}}]}';
+                    var initialFeatureCollection = JSON.parse(initialFeatureCollectionString);
 
+                    // Crear el grupo de clusters
+                    var markers = L.markerClusterGroup();
 
+                    // Iterar sobre cada capa de geometría y agregarla al grupo de clusters
+                    initialFeatureCollection.features.forEach(function (feature) {
 
-        // modificar en caso de ser necesario, toma el dato del featureCollectionStringify y lo envia como post a guardar geojson
-        function cargarFeatureCollectionEnBD() {
+                        // Acceder a propiedades específicas para mostrar en el popup
+                        var popupContent = 'Prop1: ' + feature.properties.Prop1 + '<br>Prop2: ' + feature.properties.Prop2;
 
-        fetch('/cargar_geojson', {
-            method: 'POST', //body data
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                idgeom: 2 // <-- variable del id que venga de la basea
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('-------->');
-            console.log(data.message);
-            console.log(data.geojson);
+                        // Crear la capa con el popup
+                        var layer = L.geoJSON(feature, {
+                            onEachFeature: function (feature, layer) {
+                                layer.bindPopup('<b>Información:</b><br>' + popupContent);
+                            }
+                        });
+                                                
+                        // Agregar la capa al grupo de clusters
+                        markers.addLayer(layer);
+                    });
 
+                    // Agregar el grupo de clusters al mapa
+                    map.addLayer(markers);
 
-            // load
-            // <-- convertir el geojson desde la base, y desplegarlo en el mapa
-            var initialFeatureCollectionString = data.geojson;
-            //'{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.381691,-34.550478]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.326588,-34.545388]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-58.328304,-34.567866]}}]}';
-            var initialFeatureCollection = JSON.parse(initialFeatureCollectionString);
+                    // Agregar el grupo de clusters al LayerGroup para que puedas seguir editándolo
+                    geometryLayerGroup.addLayer(markers);
 
-            // Agregar geometrías iniciales al LayerGroup
-            initialFeatureCollection.features.forEach(function(feature) {
+                    // fly to bounds
+                    map.flyToBounds(markers.getBounds());
 
-            /* ejemplo featurecollection beautificado:
+                    // console log polygon.getbounds.getcenter <- centro de geometrías:
+                    console.log("--> polygon.getbounds.getcenter: " + markers.getBounds().getCenter());
 
-            {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                    -58.361263,
-                    -34.561929
-                    ]
-                }
-                },
-                {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                    -58.387699,
-                    -34.57776
-                    ]
-                }
-                },
-                {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                    -58.328133,
-                    -34.576912
-                    ]
-                }
-                }
-            ]
-            }*/
-
-                // itera por cada feature del feature collection,
-                // crea una capa tipo geojson, y la agrega al mapa
-                var layer = L.geoJSON(feature).addTo(map);
-                geometryLayerGroup.addLayer(layer);
-
-                // fix: 20230815: escuchar eventos al editar la capa sin pm:create
-                layer.on('pm:edit', function(event) {
-                    console.log('edit', event);
-                    console.log(event.layer);
+                    // solo para validar en console.log:
                     obtenerFeatureCollection();
+                })
+                .catch(error => {
+                    console.error('Error al cargar el GeoJSON:', error);
                 });
-                
-
-                // fly to bounds
-                map.flyToBounds(L.geoJson(map.pm.getGeomanLayers(true).toGeoJSON()).getBounds());
-
-                // console log polygon.getbounds.getcenter <- centro de geometrias:
-                console.log("--> polygon.getbounds.getcenter: "+L.geoJson(map.pm.getGeomanLayers(true).toGeoJSON()).getBounds().getCenter());
-
-                // solo para validar en console.log:
-                obtenerFeatureCollection();
-            });
-
-        })
-        .catch(error => {
-            console.error('Error al cargar el GeoJSON:', error);
-        });
         }
 
-
-        // guarda al dar click en el boton
-        document.getElementById('cargardb').addEventListener('click', function() {
+        // carga al dar click en el botón
+        document.getElementById('cargardb').addEventListener('click', function () {
             cargarFeatureCollectionEnBD();
         });
-
-
-
-    
     </script>
-    
+
 </body>
 </html>
